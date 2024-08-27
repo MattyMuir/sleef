@@ -2528,17 +2528,26 @@ EXPORT CONST VECTOR_CC vdouble xasinh(vdouble x) {
   d = vsel_vd2_vo_vd2_vd2(o, ddrec_vd2_vd(x), vcast_vd2_vd_vd(y, vcast_vd_d(0)));
   d = ddsqrt_vd2_vd2(ddadd2_vd2_vd2_vd(ddsqu_vd2_vd2(d), vcast_vd_d(1)));
   d = vsel_vd2_vo_vd2_vd2(o, ddmul_vd2_vd2_vd(d, y), d);
+  d = ddadd2_vd2_vd2_vd(d, x);
 
-  d = logk2(ddnormalize_vd2_vd2(ddadd2_vd2_vd2_vd(d, x)));
+  // Use d = |x| when |x| > 1e154
+  vopmask isLarge = vgt_vo_vd_vd(y, vcast_vd_d(1e154));
+  d = vsel_vd2_vo_vd2_vd2(isLarge, vcast_vd2_vd_vd(y, vcast_vd_d(0)), d);
+
+  // Compute log(d) and convert back to double
+  d = logk2(ddnormalize_vd2_vd2(d));
   y = vadd_vd_vd_vd(vd2getx_vd_vd2(d), vd2gety_vd_vd2(d));
-  
-  y = vsel_vd_vo_vd_vd(vor_vo_vo_vo(vgt_vo_vd_vd(vabs_vd_vd(x), vcast_vd_d(SQRT_DBL_MAX)),
-				    visnan_vo_vd(y)),
-		       vmulsign_vd_vd_vd(vcast_vd_d(SLEEF_INFINITY), x), y);
 
-  y = vreinterpret_vd_vm(vor_vm_vo64_vm(visnan_vo_vd(x), vreinterpret_vm_vd(y)));
-  y = vsel_vd_vo_vd_vd(visnegzero_vo_vd(x), vcast_vd_d(-0.0), y);
+  // Add ln2 to d when |x| > 1e154
+  vdouble add = vsel_vd_vo_vd_vd(isLarge, vcast_vd_d(0.69314718055994530942), vcast_vd_d(0));
+  y = ddadd_vd_vd_vd(y, add);
+
+  // Copy sign
+  y = vcopysign_vd_vd_vd(y, x);
   
+  // Return sign(x)*Infinity when y is nan
+  y = vsel_vd_vo_vd_vd(visnan_vo_vd(y), vmulsign_vd_vd_vd(vcast_vd_d(SLEEF_INFINITY), x), y);
+
   return y;
 }
 

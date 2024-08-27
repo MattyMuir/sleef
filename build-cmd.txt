@@ -1,0 +1,4 @@
+cmake -G Ninja -D CMAKE_C_COMPILER="C:/Program Files/LLVM/bin/clang.exe" -D SLEEF_BUILD_GNUABI_LIBS=OFF -D SLEEF_BUILD_TESTS=OFF -D CMAKE_BUILD_TYPE="Release" -D CMAKE_INSTALL_PREFIX="C:/sdks/sleef" -B ./build
+cd build
+cmake --build .
+cmake --install .
