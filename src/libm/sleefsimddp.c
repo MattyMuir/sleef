@@ -2456,12 +2456,22 @@ EXPORT CONST VECTOR_CC vdouble xtanh(vdouble x) {
 }
 
 EXPORT CONST VECTOR_CC vdouble xsinh_u35(vdouble x) {
-  vdouble e = expm1k(vabs_vd_vd(x));
+  // if x > 709, x /= 2
+  vopmask willOverflow = vgt_vo_vd_vd(x, vcast_vd_d(709));
+  vdouble xdiv2 = vmul_vd_vd_vd(x, vcast_vd_d(0.5));
+  x = vsel_vd_vo_vd_vd(willOverflow, xdiv2, x);
 
-  vdouble y = vdiv_vd_vd_vd(vadd_vd_vd_vd(e, vcast_vd_d(2)), vadd_vd_vd_vd(e, vcast_vd_d(1)));
+  vdouble e = expm1k(vabs_vd_vd(x));
+  vdouble ep1 = vadd_vd_vd_vd(e, vcast_vd_d(1));
+
+  vdouble y = vdiv_vd_vd_vd(vadd_vd_vd_vd(ep1, vcast_vd_d(1)), ep1);
   y = vmul_vd_vd_vd(y, vmul_vd_vd_vd(vcast_vd_d(0.5), e));
 
-  y = vsel_vd_vo_vd_vd(vor_vo_vo_vo(vgt_vo_vd_vd(vabs_vd_vd(x), vcast_vd_d(709)), visnan_vo_vd(y)), vcast_vd_d(SLEEF_INFINITY), y);
+  // if x > 709, y *= e
+  vdouble y2 = vmul_vd_vd_vd(y, e);
+  y = vsel_vd_vo_vd_vd(willOverflow, y2, y);
+
+  y = vsel_vd_vo_vd_vd(vor_vo_vo_vo(vgt_vo_vd_vd(vabs_vd_vd(x), vcast_vd_d(711)), visnan_vo_vd(y)), vcast_vd_d(SLEEF_INFINITY), y);
   y = vmulsign_vd_vd_vd(y, x);
   y = vreinterpret_vd_vm(vor_vm_vo64_vm(visnan_vo_vd(x), vreinterpret_vm_vd(y)));
 
@@ -2469,10 +2479,19 @@ EXPORT CONST VECTOR_CC vdouble xsinh_u35(vdouble x) {
 }
 
 EXPORT CONST VECTOR_CC vdouble xcosh_u35(vdouble x) {
+  // if x > 709, x /= 2
+  vopmask willOverflow = vgt_vo_vd_vd(x, vcast_vd_d(709));
+  vdouble xdiv2 = vmul_vd_vd_vd(x, vcast_vd_d(0.5));
+  x = vsel_vd_vo_vd_vd(willOverflow, xdiv2, x);
+
   vdouble e = xexp(vabs_vd_vd(x));
   vdouble y = vmla_vd_vd_vd_vd(vcast_vd_d(0.5), e, vdiv_vd_vd_vd(vcast_vd_d(0.5), e));
 
-  y = vsel_vd_vo_vd_vd(vor_vo_vo_vo(vgt_vo_vd_vd(vabs_vd_vd(x), vcast_vd_d(709)), visnan_vo_vd(y)), vcast_vd_d(SLEEF_INFINITY), y);
+  // if x > 709, y *= e
+  vdouble y2 = vmul_vd_vd_vd(y, e);
+  y = vsel_vd_vo_vd_vd(willOverflow, y2, y);
+
+  y = vsel_vd_vo_vd_vd(vor_vo_vo_vo(vgt_vo_vd_vd(vabs_vd_vd(x), vcast_vd_d(711)), visnan_vo_vd(y)), vcast_vd_d(SLEEF_INFINITY), y);
   y = vreinterpret_vd_vm(vor_vm_vo64_vm(visnan_vo_vd(x), vreinterpret_vm_vd(y)));
 
   return y;
