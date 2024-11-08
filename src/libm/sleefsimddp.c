@@ -2170,7 +2170,7 @@ EXPORT CONST VECTOR_CC vdouble xexp(vdouble d) {
   
   u = vldexp2_vd_vd_vi(u, q);
 
-  u = vsel_vd_vo_vd_vd(vgt_vo_vd_vd(d, vcast_vd_d(709.78271114955742909217217426)), vcast_vd_d(SLEEF_INFINITY), u);
+  u = vsel_vd_vo_vd_vd(vgt_vo_vd_vd(d, vcast_vd_d(709.782712893384)), vcast_vd_d(SLEEF_INFINITY), u);
   u = vreinterpret_vd_vm(vandnot_vm_vo64_vm(vlt_vo_vd_vd(d, vcast_vd_d(-1000)), vreinterpret_vm_vd(u)));
 
   return u;
@@ -2346,7 +2346,7 @@ EXPORT CONST VECTOR_CC vdouble xpow(vdouble x, vdouble y) {
 
   vdouble2 d = ddmul_vd2_vd2_vd(logk(vabs_vd_vd(x)), y);
   vdouble result = expk(d);
-  result = vsel_vd_vo_vd_vd(vgt_vo_vd_vd(vd2getx_vd_vd2(d), vcast_vd_d(709.78271114955742909217217426)), vcast_vd_d(SLEEF_INFINITY), result);
+  result = vsel_vd_vo_vd_vd(vgt_vo_vd_vd(vd2getx_vd_vd2(d), vcast_vd_d(709.782712893384)), vcast_vd_d(SLEEF_INFINITY), result);
 
   result = vmul_vd_vd_vd(result,
 			 vsel_vd_vo_vd_vd(vgt_vo_vd_vd(x, vcast_vd_d(0)),
